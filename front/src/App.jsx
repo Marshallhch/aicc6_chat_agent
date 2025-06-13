@@ -1,9 +1,37 @@
 import { useState } from 'react';
 import './App.css';
 import ChatIcon from './components/ChatIcon';
+import ChatForm from './components/ChatForm';
 
 const App = () => {
-  const [showChatbot, setShowChatbot] = useState(false);
+  const BACKEND_URL = 'http://localhost:8000/chat';
+
+  const generateChatResponse = async (history) => {
+    const formattedHistory = history.map(({ role, text }) => ({
+      role: role === 'user' ? 'user' : 'model',
+      parts: [{ text: text }],
+    }));
+
+    const options = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: formattedHistory }),
+    };
+
+    try {
+      const response = await fetch(BACKEND_URL, options);
+      const data = await response.json();
+
+      if (!response.ok)
+        throw new Error(data.error.message || '요청 오류가 발생했습니다.');
+
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const [showChatbot, setShowChatbot] = useState(true);
   return (
     <div className={`container ${showChatbot ? 'show-chatbot' : ''}`}>
       <button id="cb-toggler" onClick={() => setShowChatbot((prev) => !prev)}>
@@ -15,10 +43,35 @@ const App = () => {
         <div className="cb-header">
           <div className="header-info">
             <ChatIcon />
+            <h2 className="logo-text">Agent Chatbot</h2>
+          </div>
+          <button
+            className="material-symbols-rounded arrow-icon"
+            onClick={() => setShowChatbot((prev) => !prev)}
+          >
+            keyboard_arrow_down
+          </button>
+        </div>
+        <div className="cb-body">
+          <div className="message bot-message">
+            <ChatIcon />
+            <p className="message-text">
+              안녕하세요 <br /> 저는 챗봇입니다. 무엇을 도와드릴까요?
+            </p>
+          </div>
+
+          <div className="message user-message">
+            <p className="message-text">교통사고 보험처리 절차를 알려주세요.</p>
+          </div>
+
+          <div className="message bot-message">
+            <ChatIcon />
+            <p className="message-text">변호사한테 물어보세요.</p>
           </div>
         </div>
-        <div className="cb-body"></div>
-        <div className="cb-footer"></div>
+        <div className="cb-footer">
+          <ChatForm generateChatResponse={generateChatResponse} />
+        </div>
       </div>
     </div>
   );
