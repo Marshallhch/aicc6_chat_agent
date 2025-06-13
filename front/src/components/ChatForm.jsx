@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 
-const ChatForm = ({ generateChatResponse }) => {
+const ChatForm = ({ generateChatResponse, chatHistory, setChatHistory }) => {
   const inputRef = useRef();
 
   const handleSubmit = (e) => {
@@ -11,11 +11,18 @@ const ChatForm = ({ generateChatResponse }) => {
     if (!userMessage) return;
     inputRef.current.value = '';
 
-    // 교통사고 처리 절차를 알려주세요
+    setChatHistory((history) => [
+      ...history,
+      { role: 'user', text: userMessage },
+    ]);
 
-    generateChatResponse([{ role: 'user', text: userMessage }]);
-
-    console.log(userMessage);
+    setTimeout(() => {
+      setChatHistory((history) => [
+        ...history,
+        { role: 'model', text: '생각중...' },
+      ]);
+      generateChatResponse([{ role: 'user', text: userMessage }]);
+    }, 500);
   };
   return (
     <form className="chat-form" onSubmit={handleSubmit}>

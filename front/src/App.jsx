@@ -5,8 +5,17 @@ import ChatForm from './components/ChatForm';
 
 const App = () => {
   const BACKEND_URL = 'http://localhost:8000/chat';
+  const [chatHistory, setChatHistory] = useState([]);
 
   const generateChatResponse = async (history) => {
+    const updateHistory = (text) => {
+      // setChatHistory((prev) => [...prev.filter((msg) => console.log(msg))]),
+      setChatHistory((prev) => [
+        ...prev.filter((msg) => msg.text !== '생각중...'),
+      ]),
+        { role: 'model', text };
+    };
+
     const formattedHistory = history.map(({ role, text }) => ({
       role: role === 'user' ? 'user' : 'model',
       parts: [{ text: text }],
@@ -26,6 +35,8 @@ const App = () => {
         throw new Error(data.error.message || '요청 오류가 발생했습니다.');
 
       console.log(data);
+
+      updateHistory(data.candidates[0].content.parts[0].text);
     } catch (error) {
       console.log(error);
     }
@@ -70,7 +81,11 @@ const App = () => {
           </div>
         </div>
         <div className="cb-footer">
-          <ChatForm generateChatResponse={generateChatResponse} />
+          <ChatForm
+            generateChatResponse={generateChatResponse}
+            chatHistory={chatHistory}
+            setChatHistory={setChatHistory}
+          />
         </div>
       </div>
     </div>
