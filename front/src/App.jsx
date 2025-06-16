@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './App.css';
 import ChatIcon from './components/ChatIcon';
 import ChatForm from './components/ChatForm';
@@ -7,6 +7,9 @@ import ChatMessages from './components/ChatMessages';
 const App = () => {
   const BACKEND_URL = 'http://localhost:8000/chat';
   const [chatHistory, setChatHistory] = useState([]);
+  const [showChatbot, setShowChatbot] = useState(true);
+
+  const chatBodyRef = useRef();
 
   const generateChatResponse = async (history) => {
     const updateHistory = (text) => {
@@ -43,7 +46,13 @@ const App = () => {
     }
   };
 
-  const [showChatbot, setShowChatbot] = useState(true);
+  useEffect(() => {
+    chatBodyRef.current.scrollTo({
+      top: chatBodyRef.current.scrollHeight,
+      behavior: 'smooth',
+    });
+  }, [chatHistory]);
+
   return (
     <div className={`container ${showChatbot ? 'show-chatbot' : ''}`}>
       <button id="cb-toggler" onClick={() => setShowChatbot((prev) => !prev)}>
@@ -64,7 +73,7 @@ const App = () => {
             keyboard_arrow_down
           </button>
         </div>
-        <div className="cb-body">
+        <div className="cb-body" ref={chatBodyRef}>
           <div className="message bot-message">
             <ChatIcon />
             <p className="message-text">
@@ -76,15 +85,6 @@ const App = () => {
           {chatHistory.map((chat, idx) => (
             <ChatMessages key={idx} chat={chat} />
           ))}
-
-          {/* <div className="message user-message">
-            <p className="message-text">교통사고 보험처리 절차를 알려주세요.</p>
-          </div>
-
-          <div className="message bot-message">
-            <ChatIcon />
-            <p className="message-text">변호사한테 물어보세요.</p>
-          </div> */}
         </div>
         <div className="cb-footer">
           <ChatForm
